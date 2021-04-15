@@ -1,0 +1,13 @@
+﻿# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/contentModel.xml
+/projectSettingsUpdater.xml
+/.idea.ScrabbleTemplate.iml
+/modules.xml
+# Datasource local storage ignored files
+/../../../../../../../../../../../../:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrabble\.idea\.idea.ScrabbleTemplate\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/

@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+
+    <Content Include="Dictionaries\English.txt" />
+    <Compile Include="Dictionary.fsi" />
+    <Compile Include="Dictionary.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\Jesper\.nuget\packages\fsharp.core\5.0.1\contentFiles\any\netstandard2.0\FSharp.Core.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Oxyphenbutazone" Version="1.0.6" />
+    <PackageReference Include="ScrabbleServer" Version="1.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ScrabbleBot\ScrabbleBot.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="5.0.1" />
+  </ItemGroup>
+
+</Project>
