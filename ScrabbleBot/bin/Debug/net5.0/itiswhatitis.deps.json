@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v5.0": {
-      "itiswhatitis/1.0.0": {
+      "itiswhatitis/1.0.1": {
         "dependencies": {
           "FParsec": "1.1.1",
           "FSharp.Core": "5.0.1",
@@ -194,7 +194,7 @@
     }
   },
   "libraries": {
-    "itiswhatitis/1.0.0": {
+    "itiswhatitis/1.0.1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

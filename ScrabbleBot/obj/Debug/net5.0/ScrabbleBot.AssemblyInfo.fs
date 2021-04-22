@@ -9,11 +9,11 @@ open System.Reflection
 
 [<assembly: System.Reflection.AssemblyCompanyAttribute("IT University of Copenhagen")>]
 [<assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")>]
-[<assembly: System.Reflection.AssemblyDescriptionAttribute("Scrabble Bot for Functional Programming 2021\r\n      \r\nGroup name: It is what ti is ")>]
-[<assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")>]
-[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")>]
-[<assembly: System.Reflection.AssemblyProductAttribute("ItiswhatitisScrabbleBot")>]
+[<assembly: System.Reflection.AssemblyDescriptionAttribute("Scrabble Bot for Functional Programming 2021\r\n      \r\nGroup name: It is what it is ")>]
+[<assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.1.0")>]
+[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.1")>]
+[<assembly: System.Reflection.AssemblyProductAttribute("ScrubbleBot")>]
 [<assembly: System.Reflection.AssemblyTitleAttribute("itiswhatitis")>]
-[<assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")>]
+[<assembly: System.Reflection.AssemblyVersionAttribute("1.0.1.0")>]
 [<assembly: System.Reflection.AssemblyMetadataAttribute("RepositoryUrl", "https://github.com/jesper-bengtson/Scrabble-FP2021/")>]
 do()

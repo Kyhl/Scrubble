@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Morten K\\OneDrive\\ITU\\4. Semester\\FP\\Assignments\\Scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {}
+    "C:\\Users\\Morten K\\OneDrive\\ITU\\4. Semester\\FP\\Assignments\\Scrubble\\ScrabbleBot\\ScrabbleBot.fsproj": {}
   },
   "projects": {
-    "C:\\Users\\Morten K\\OneDrive\\ITU\\4. Semester\\FP\\Assignments\\Scrabble\\ScrabbleBot\\ScrabbleBot.fsproj": {
+    "C:\\Users\\Morten K\\OneDrive\\ITU\\4. Semester\\FP\\Assignments\\Scrubble\\ScrabbleBot\\ScrabbleBot.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Morten K\\OneDrive\\ITU\\4. Semester\\FP\\Assignments\\Scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
+        "projectUniqueName": "C:\\Users\\Morten K\\OneDrive\\ITU\\4. Semester\\FP\\Assignments\\Scrubble\\ScrabbleBot\\ScrabbleBot.fsproj",
         "projectName": "itiswhatitis",
-        "projectPath": "C:\\Users\\Morten K\\OneDrive\\ITU\\4. Semester\\FP\\Assignments\\Scrabble\\ScrabbleBot\\ScrabbleBot.fsproj",
+        "projectPath": "C:\\Users\\Morten K\\OneDrive\\ITU\\4. Semester\\FP\\Assignments\\Scrubble\\ScrabbleBot\\ScrabbleBot.fsproj",
         "packagesPath": "C:\\Users\\Morten K\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Morten K\\OneDrive\\ITU\\4. Semester\\FP\\Assignments\\Scrabble\\ScrabbleBot\\obj\\",
+        "outputPath": "C:\\Users\\Morten K\\OneDrive\\ITU\\4. Semester\\FP\\Assignments\\Scrubble\\ScrabbleBot\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

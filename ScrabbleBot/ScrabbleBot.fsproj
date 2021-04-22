@@ -5,14 +5,14 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company>IT University of Copenhagen</Company>
    
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <PackageId>itiswhatitis</PackageId>
     <AssemblyName>itiswhatitis</AssemblyName>
     <Authors>kaky,thhk </Authors>
-    <Product>ItiswhatitisScrabbleBot</Product>
+    <Product>ScrubbleBot</Product>
     <Description>Scrabble Bot for Functional Programming 2021
       
-Group name: It is what ti is </Description>
+Group name: It is what it is </Description>
   </PropertyGroup>
 
   <ItemGroup>

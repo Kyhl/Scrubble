@@ -2,12 +2,12 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>itiswhatitis</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <authors>kaky,thhk</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Scrabble Bot for Functional Programming 2021
       
-Group name: It is what ti is</description>
+Group name: It is what it is</description>
     <repository url="https://github.com/jesper-bengtson/Scrabble-FP2021/" />
     <dependencies>
       <group targetFramework="net5.0">

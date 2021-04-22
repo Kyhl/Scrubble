@@ -5,9 +5,10 @@
 
 module internal Parser
 
-    open ScrabbleUtil // NEW. KEEP THIS LINE.
+     // NEW. KEEP THIS LINE.
     open System
     open Eval
+    open ScrabbleUtil
     open FParsecLight.TextParser     // Industrial parser-combinator library. Use for Scrabble Project.
     // Example parser combinator library. Use for CodeJudge.
     //open FParsecLight.TextParser     // Industrial parser-combinator library. Use for Scrabble Project.
@@ -162,10 +163,9 @@ module internal Parser
     type word   = (char * int) list
     type square = Map<int, word -> int -> int -> int>
 
-    let parseSquareFun sqp = Map.map (fun x y -> stmntToSquareFun (getSuccess(run stmntParse y))) sqp
+    let parseSquareFun (sqp:squareProg) = Map.map (fun x y -> stmntToSquareFun (getSuccess(run stmntParse y))) sqp
 
     let parseBoardFun s m = stmntToBoardFun (getSuccess(run stmntParse s)) m
-
     type boardFun = coord -> square option
     type board = {
         center        : coord
@@ -174,7 +174,7 @@ module internal Parser
     }
 
     let parseBoardProg (bp : boardProg) : board =
-        let m = Map.map (fun x y -> parseSquareFun y) bp.squares;
+        let m = Map.map (fun x -> parseSquareFun) bp.squares;
         {
             center = bp.center;
             defaultSquare = Map.find bp.usedSquare m ;

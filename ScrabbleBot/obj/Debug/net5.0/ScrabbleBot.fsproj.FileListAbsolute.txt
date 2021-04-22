@@ -7,3 +7,12 @@ C:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrabble\ScrabbleBot\b
 C:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrabble\ScrabbleBot\bin\Debug\net5.0\itiswhatitis.pdb
 C:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrabble\ScrabbleBot\obj\Debug\net5.0\itiswhatitis.dll
 C:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrabble\ScrabbleBot\obj\Debug\net5.0\itiswhatitis.pdb
+C:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrubble\ScrabbleBot\bin\Debug\net5.0\FSharp.Core.xml
+C:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrubble\ScrabbleBot\bin\Debug\net5.0\itiswhatitis.deps.json
+C:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrubble\ScrabbleBot\bin\Debug\net5.0\itiswhatitis.dll
+C:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrubble\ScrabbleBot\bin\Debug\net5.0\itiswhatitis.pdb
+C:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrubble\ScrabbleBot\obj\Debug\net5.0\ScrabbleBot.fsprojAssemblyReference.cache
+C:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrubble\ScrabbleBot\obj\Debug\net5.0\ScrabbleBot.AssemblyInfoInputs.cache
+C:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrubble\ScrabbleBot\obj\Debug\net5.0\ScrabbleBot.AssemblyInfo.fs
+C:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrubble\ScrabbleBot\obj\Debug\net5.0\itiswhatitis.dll
+C:\Users\Morten K\OneDrive\ITU\4. Semester\FP\Assignments\Scrubble\ScrabbleBot\obj\Debug\net5.0\itiswhatitis.pdb
