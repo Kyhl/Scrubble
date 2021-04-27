@@ -6,6 +6,7 @@ open ScrabbleUtil.ServerCommunication
 open System.IO
 
 open ScrabbleUtil.DebugPrint
+open StateMonad
 
 // The RegEx module is only used to parse human input. It is not used for the final product.
 
@@ -37,7 +38,7 @@ module RegEx =
 
 module State = 
     // Make sure to keep your state localised in this module. It makes your life a whole lot easier.
-    // Currently, it only keeps track of your hand, your player numer, your board, and your dictionary,
+    // Currently, it only keeps track of your hand, your player number, your board, and your dictionary,
     // but it could, potentially, keep track of other useful
     // information, such as number of players, player turn, etc.
 
@@ -62,7 +63,7 @@ module Scrabble =
 
         let rec aux (st : State.state) =
             Print.printHand pieces (State.hand st)
-
+            
             // remove the force print when you move on from manual input (or when you have learnt the format)
             forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
             let input =  System.Console.ReadLine()
@@ -77,7 +78,10 @@ module Scrabble =
             match msg with
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
-                let st' = st // This state needs to be updated
+                let removed = List.fold (fun acc (_,(y,_)) -> MultiSet.removeSingle y acc) st.hand ms
+                let added = List.fold (fun acc (x,y) -> MultiSet.addSingle x acc) removed newPieces
+                let (st') = {st with hand =  added}
+                     // This state needs to be updated
                 aux st'
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
