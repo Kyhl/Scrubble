@@ -48,7 +48,7 @@ let main argv =
 
     //let players = spawnMultiples "OxyphenButazone" Oxyphenbutazone.Scrabble.startGame 2
     // Uncomment this line to call your client
-    let players    = [("ScrubbleBot", itiswhatitis.Scrabble.startGame)]
+    let players    = [("ScrubbleBot", itiswhatitis.Scrabble.startGame);("kyhl", itiswhatitis.Scrabble.startGame)]
     let (dictionary, time) =
         time (fun () -> ScrabbleUtil.Dictionary.mkDict
                             Dictionary.empty

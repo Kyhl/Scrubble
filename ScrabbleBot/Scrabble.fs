@@ -36,25 +36,29 @@ module RegEx =
         hand |>
         MultiSet.fold (fun _ x i -> forcePrint (sprintf "%d -> (%A, %d)\n" x (Map.find x pieces) i)) ()
 
-module State = 
+module internal State = 
     // Make sure to keep your state localised in this module. It makes your life a whole lot easier.
     // Currently, it only keeps track of your hand, your player number, your board, and your dictionary,
     // but it could, potentially, keep track of other useful
     // information, such as number of players, player turn, etc.
 
     type state = {
-        board         : Parser.board
-        dict          : ScrabbleUtil.Dictionary.Dict
-        playerNumber  : uint32
-        hand          : MultiSet.MultiSet<uint32>
+        board           : Parser.board
+        dict            : ScrabbleUtil.Dictionary.Dict
+        playerNumber    : uint32
+        hand            : MultiSet.MultiSet<uint32>
+        numPlayers      : uint32
+        playerTurn      : uint32
+        FF              : MultiSet.MultiSet<uint32>
     }
-
-    let mkState b d pn h = {board = b; dict = d;  playerNumber = pn; hand = h }
+    let mkState b d pn h np pt = {board = b; dict = d;  playerNumber = pn; hand = h; numPlayers = np; playerTurn = pt; FF = MultiSet.empty}
 
     let board st         = st.board
     let dict st          = st.dict
     let playerNumber st  = st.playerNumber
     let hand st          = st.hand
+    let numPlayers st    = st.numPlayers
+    let playerTurn st    = st.playerTurn
 
 module Scrabble =
     open System.Threading
@@ -80,18 +84,22 @@ module Scrabble =
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
                 let removed = List.fold (fun acc (_,(y,_)) -> MultiSet.removeSingle y acc) st.hand ms
                 let added = List.fold (fun acc (x,y) -> MultiSet.addSingle x acc) removed newPieces
-                let (st') = {st with hand =  added}
-                     // This state needs to be updated
+                let newTurn = if(st.playerNumber = st.numPlayers) then 1u else st.playerTurn+1u
+                let st' = {st with hand =  added; playerTurn = newTurn}
                 aux st'
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
-                let st' = st // This state needs to be updated
+                let newTurn = if(pid = st.numPlayers) then 1u else st.playerTurn+1u
+                let st' = {st with playerTurn = newTurn}
                 aux st'
             | RCM (CMPlayFailed (pid, ms)) ->
                 (* Failed play. Update your state *)
                 let st' = st // This state needs to be updated
                 aux st'
             | RCM (CMGameOver _) -> ()
+            | RCM (CMForfeit pid) ->
+                let st' = {st with FF = MultiSet.addSingle pid st.FF}
+                aux st'
             | RCM a -> failwith (sprintf "not implmented: %A" a)
             | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st
 
@@ -122,5 +130,5 @@ module Scrabble =
                   
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
 
-        fun () -> playGame cstream tiles (State.mkState board dict playerNumber handSet)
+        fun () -> playGame cstream tiles (State.mkState board dict playerNumber handSet numPlayers playerTurn)
         
