@@ -50,8 +50,9 @@ module internal State =
         numPlayers      : uint32
         playerTurn      : uint32
         FF              : MultiSet.MultiSet<uint32>
+        tilesOnBoard    : Map<int * int, char * int>
     }
-    let mkState b d pn h np pt = {board = b; dict = d;  playerNumber = pn; hand = h; numPlayers = np; playerTurn = pt; FF = MultiSet.empty}
+    let mkState b d pn h np pt = {board = b; dict = d;  playerNumber = pn; hand = h; numPlayers = np; playerTurn = pt; FF = MultiSet.empty; tilesOnBoard = Map.empty}
 
     let board st         = st.board
     let dict st          = st.dict
@@ -59,6 +60,7 @@ module internal State =
     let hand st          = st.hand
     let numPlayers st    = st.numPlayers
     let playerTurn st    = st.playerTurn
+    let tilesOnBoard st  = st.tilesOnBoard
 
 module Scrabble =
     open System.Threading
