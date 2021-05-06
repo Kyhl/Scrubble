@@ -8,8 +8,9 @@ open System.IO
 open ScrabbleUtil.DebugPrint
 open StateMonad
 
-// The RegEx module is only used to parse human input. It is not used for the final product.
 
+
+// The RegEx module is only used to parse human input. It is not used for the final product.
 module RegEx =
     open System.Text.RegularExpressions
 
@@ -50,8 +51,11 @@ module internal State =
         numPlayers      : uint32
         playerTurn      : uint32
         FF              : MultiSet.MultiSet<uint32>
+        playedTiles     : Map<coord,(char*int)>
+        scores          : Map<uint32,int>
+        tilesLeft       : int
     }
-    let mkState b d pn h np pt = {board = b; dict = d;  playerNumber = pn; hand = h; numPlayers = np; playerTurn = pt; FF = MultiSet.empty}
+    let mkState b d pn h np pt = {board = b; dict = d;  playerNumber = pn; hand = h; numPlayers = np; playerTurn = pt; FF = MultiSet.empty; playedTiles = Map.empty; tilesLeft = 100;scores = Map.empty}
 
     let board st         = st.board
     let dict st          = st.dict
@@ -59,7 +63,20 @@ module internal State =
     let hand st          = st.hand
     let numPlayers st    = st.numPlayers
     let playerTurn st    = st.playerTurn
-
+module MoveLogic =
+    let lPatial
+    let rightSide (st:State.state) pw coord =
+        if (Map.containsKey coord st.playedTiles) then
+            if (Dictionary.lookup pw st.dict) then
+                
+    let wordCheck (st:State.state) =
+        let aux1 hand =
+            
+            match hand with
+            | x::y -> Dictionary.step x st.dict
+            
+        aux1 st.hand
+        //if(Map.count st.playedTiles = 0) then aux1 (0,0) st.Hand 
 module Scrabble =
     open System.Threading
 
@@ -84,17 +101,25 @@ module Scrabble =
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
                 let removed = List.fold (fun acc (_,(y,_)) -> MultiSet.removeSingle y acc) st.hand ms
                 let added = List.fold (fun acc (x,y) -> MultiSet.addSingle x acc) removed newPieces
+                let played = List.fold (fun acc (x,(_,y)) -> Map.add x y acc) st.playedTiles ms
                 let newTurn = if(st.playerNumber = st.numPlayers) then 1u else st.playerTurn+1u
-                let st' = {st with hand =  added; playerTurn = newTurn}
+                let tileCount = st.tilesLeft - (List.length ms)
+                let newScore = Map.add st.playerNumber points st.scores
+                let st' = {st with hand =  added; playerTurn = newTurn; playedTiles = played; tilesLeft = tileCount; scores = newScore}
                 aux st'
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
                 let newTurn = if(pid = st.numPlayers) then 1u else st.playerTurn+1u
-                let st' = {st with playerTurn = newTurn}
+                let played = List.fold (fun acc (x,(_,y)) -> Map.add x y acc) st.playedTiles ms
+                let tileCount = st.tilesLeft - (List.length ms)
+                let newScore = Map.add pid points st.scores
+                let st' = {st with playerTurn = newTurn; playedTiles = played; tilesLeft = tileCount; scores = newScore}
                 aux st'
             | RCM (CMPlayFailed (pid, ms)) ->
                 (* Failed play. Update your state *)
-                let st' = st // This state needs to be updated
+                
+                let newTurn = if(pid = st.numPlayers) then 1u else st.playerTurn+1u
+                let st' = {st with playerTurn = newTurn}
                 aux st'
             | RCM (CMGameOver _) -> ()
             | RCM (CMForfeit pid) ->
