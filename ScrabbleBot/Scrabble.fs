@@ -1,5 +1,6 @@
 ﻿namespace itiswhatitis
 
+open MultiSet
 open ScrabbleUtil
 open ScrabbleUtil.ServerCommunication
 
@@ -54,8 +55,9 @@ module internal State =
         playedTiles     : Map<coord,(char*int)>
         scores          : Map<uint32,int>
         tilesLeft       : int
+        tiles           : Map<uint32, tile>
     }
-    let mkState b d pn h np pt = {board = b; dict = d;  playerNumber = pn; hand = h; numPlayers = np; playerTurn = pt; FF = MultiSet.empty; playedTiles = Map.empty; tilesLeft = 100;scores = Map.empty}
+    let mkState b d pn h np pt t = {board = b; dict = d;  playerNumber = pn; hand = h; numPlayers = np; playerTurn = pt; FF = MultiSet.empty; playedTiles = Map.empty; tilesLeft = 100;scores = Map.empty; tiles = t}
 
     let board st         = st.board
     let dict st          = st.dict
@@ -64,10 +66,29 @@ module internal State =
     let numPlayers st    = st.numPlayers
     let playerTurn st    = st.playerTurn
 module MoveLogic =
-    let lPatial
-    let rightSide (st:State.state) pw coord =
-        if (Map.containsKey coord st.playedTiles) then
-            if (Dictionary.lookup pw st.dict) then
+    //let lPatial
+    let CurrentMove = ""
+    let handContain (st:State.state) c =
+        match List.tryFindBack (fun x -> (fst(Set.minElement(Map.find x st.tiles))) = c) (MultiSet.toList st.hand) with
+        | Some s -> true
+        | None -> false
+        
+    //let SaveMove (word:string) =
+        //List.ofSeq word |> 
+    let rightSide (st:State.state) (pw:string)  (dic:(bool*Dictionary.Dict)) (coord:ScrabbleUtil.coord) =
+        if not (Map.containsKey coord st.playedTiles) then
+            if (fst(dic)) then
+                SaveMove(pw)
+            for word in snd(dic) do
+                if(handContain (word.Chars(pw.Length-1))) then
+                    let newWord = (pw+(word.Chars(pw.Length-1)))
+                    rightside st newWord (Dictionary.step dic newWord) (fst(coord)+1,snd(coord))
+       
+        else
+            let newWord = (pw+(fst(Map.find coord st.playedTiles)))
+            rightside st newWord (Dictionary.step dic newWord) (fst(coord)+1,snd(coord))
+             
+                
                 
     let wordCheck (st:State.state) =
         let aux1 hand =
@@ -152,8 +173,9 @@ module Scrabble =
         //let dict = dictf true // Uncomment if using a gaddag for your dictionary
         let dict = dictf false // Uncomment if using a trie for your dictionary
         let board = Parser.parseBoardProg boardP
+        
                   
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
 
-        fun () -> playGame cstream tiles (State.mkState board dict playerNumber handSet numPlayers playerTurn)
+        fun () -> playGame cstream tiles (State.mkState board dict playerNumber handSet numPlayers playerTurn tiles)
         

@@ -931,7 +931,7 @@
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
-    "version": "1.0.1",
+    "version": "1.0.2",
     "restore": {
       "projectUniqueName": "C:\\Users\\Morten K\\OneDrive\\ITU\\4. Semester\\FP\\Assignments\\Scrubble\\ScrabbleBot\\ScrabbleBot.fsproj",
       "projectName": "itiswhatitis",
