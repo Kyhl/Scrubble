@@ -66,25 +66,11 @@ module internal State =
     let hand st          = st.hand
     let numPlayers st    = st.numPlayers
     let playerTurn st    = st.playerTurn
+    
+    let state (st:state) = st
 module MoveLogic =
     open Dictionary
-    let getLetter (st:State.state) (id:uint32) =
-       fst (Set.minElement(Map.find id st.tiles))
-    let nextCoord (c:coord) (hori:bool) =
-        if hori then
-            ((fst c)+1,(snd c))
-        else
-            ((fst c),(snd c)-1)
-    let longestWord (word1: (coord * (uint32 * (char * int))) list) (word2: (coord * (uint32 * (char * int))) list) =
-        if(word1.Length>word2.Length) then word1
-        else word2 
-    let moveGen (st:State.state) (c:coord) (hori:bool) =
-        let rec aux (dict:(bool*Dict)) (hand:MultiSet<uint32>) (c2:coord) (currentWord: (coord * (uint32 * (char * int))) list) (bestWord: (coord * (uint32 * (char * int))) list)  =
-            match Map.tryFind c2 st.playedTiles with
-            | Some c ->
-                match step (fst c) (snd dict) with
-                | Some d -> aux d hand (nextCoord c2 hori) currentWord bestWord
-                        //if(fst(d)) then aux (d) hand c2 cWord bWord                
+                            //if(fst(d)) then aux (d) hand c2 cWord bWord                
 //                        | Some d ->  MultiSet.fold (fun acc x y ->
 //                                        match Dictionary.step (fst(Set.minElement(Map.find x (st.tiles)))) (snd(d)) with
 //                                        | Some d ->                                           
@@ -101,34 +87,47 @@ module MoveLogic =
 //                                        
 //                                        | None -> bWord
 //                                        ) cWord hand
-                                
+    let getLetter (st:State.state) (id:uint32) =
+       fst (Set.minElement(Map.find id st.tiles))
+    let nextCoord (c:coord) (hori:bool) =
+        if hori then
+            ((fst c)+1,(snd c))
+        else
+            ((fst c),(snd c)-1)
+    let longestWord (word1: (coord * (uint32 * (char * int))) list) (word2: (coord * (uint32 * (char * int))) list) =
+        if(word1.Length>word2.Length) then word1
+        else word2 
+    let moveGen (st:State.state) (c:coord) (hori:bool) =
+        let rec aux (dict:(bool*Dict)) (hand:MultiSet<uint32>) (c2:coord) (currentWord: (coord * (uint32 * (char * int))) list) (bestWord: (coord * (uint32 * (char * int))) list)  =
+            match Map.tryFind c2 st.playedTiles with
+            | Some c ->
+                match step (fst c) (snd dict) with
+                | Some d -> aux d hand (nextCoord c2 hori) currentWord bestWord       
                 | None -> bestWord
             | None ->
-                    fold (fun acc x y ->
-                    match step (fst(Set.minElement(Map.find x (st.tiles)))) (snd(dict)) with
-                    | Some d ->                                           
-                        let current = (acc@[((c2),(x,(Set.minElement(Map.find x st.tiles))))])
+                    fold (fun acc tileId tileCount ->
+                    match step (fst(Set.minElement(Map.find tileId (st.tiles)))) (snd(dict)) with
+                    | Some d ->
+                        let current = ((c2,(tileId,(Set.minElement(Map.find tileId st.tiles))))::acc)
                         if(fst(d)) then
-                            //printf "Current list of letters: %A \n" (current)
-                            aux d (removeSingle x hand) c2 current (longestWord current bestWord)
+                            aux d (removeSingle tileId hand) (nextCoord c2 hori) current (longestWord current bestWord)
                         else
-                            aux d (removeSingle x hand) c2 current bestWord
-                    
+                            aux d (removeSingle tileId hand) (nextCoord c2 hori) current bestWord
                     | None ->
+                        //printf "Current list of letters: %A \n" (current)
                         //printf "Acc: %A \n" (acc) 
-                        printf "Current bestmove: %A \n" (bestWord)
-                        //aux (false,st.dict) st.hand c List.empty bestWord 
-                        
-                        bestWord
-                    ) currentWord hand
-                    
-                    
+                        //printf "Current bestmove: %A \n" (bestWord)
+                        //aux (false,st.dict) st.hand c2 List.empty bestWord 
+                        acc
+                    ) bestWord hand
+                    //printf "Best move %A" (bestWord)
            
         aux (false,st.dict) st.hand c List.empty List.empty //[((0,0),(20u,('T',1)));((1,0),(15u,('O',1)));]
     let move (st:State.state)=
         if(Map.isEmpty st.playedTiles) then
+           // printf "State : %A \n" st
             printf "Move generated: %A \n" (moveGen st (0,0) true) 
-            moveGen st (0,0) true
+            moveGen st st.board.center true
         else
             Map.fold (fun acc k v -> moveGen st k true) List.empty st.playedTiles
             
@@ -168,7 +167,7 @@ module MoveLogic =
 
 module Scrabble =
     open System.Threading
-
+    open MoveLogic
     let playGame cstream pieces (st : State.state) =
 
         let rec aux (st : State.state) =
@@ -180,11 +179,11 @@ module Scrabble =
             //let input =  System.Console.ReadLine()
             //let move = RegEx.parseMove input
             
-            debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) (MoveLogic.move st)) // keep the debug lines. They are useful.
+            //debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) (move (State.state st))) // keep the debug lines. They are useful.
             send cstream (SMPlay (MoveLogic.move st))
 
             let msg = recv cstream
-            debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) (MoveLogic.move st)) // keep the debug lines. They are useful.
+            //debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) (move (State.state st))) // keep the debug lines. They are useful.
 
             match msg with
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
@@ -192,25 +191,23 @@ module Scrabble =
                 let removed = List.fold (fun acc (_,(y,_)) -> MultiSet.removeSingle y acc) st.hand ms
                 let added = List.fold (fun acc (x,y) -> MultiSet.addSingle x acc) removed newPieces
                 let played = List.fold (fun acc (x,(_,y)) -> Map.add x y acc) st.playedTiles ms
-                let newTurn = 
-                    let rec foundPlayer playerNumber =
-                        if(playerNumber = st.numPlayers) then 
-                            if (MultiSet.contains 1u st.FF) then
-                                foundPlayer 1u
-                            else
-                                1u 
-                        else 
-                            if (MultiSet.contains (playerNumber + 1u) st.FF) then
-                                foundPlayer st.playerTurn+1u
-                            else
-                                st.playerTurn + 1u
-
-                    foundPlayer st.playerNumber
-                    
-                        
+//                let newTurn = 
+//                    let rec foundPlayer playerNumber =
+//                        if(playerNumber = st.numPlayers) then 
+//                            if (MultiSet.contains 1u st.FF) then
+//                                foundPlayer 1u
+//                            else
+//                                1u 
+//                        else 
+//                            if (MultiSet.contains (playerNumber + 1u) st.FF) then
+//                                foundPlayer st.playerTurn+1u
+//                            else
+//                                st.playerTurn + 1u
+//
+//                    foundPlayer st.playerNumber
                 let tileCount = st.tilesLeft - (List.length ms)
                 let newScore = Map.add st.playerNumber points st.scores
-                let st' = {st with hand =  added; playerTurn = newTurn; playedTiles = played; tilesLeft = tileCount; scores = newScore}
+                let st' = {st with hand =  added;  playedTiles = played; tilesLeft = tileCount; scores = newScore}
                 aux st'
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
