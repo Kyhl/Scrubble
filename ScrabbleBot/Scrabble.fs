@@ -104,23 +104,27 @@ module MoveLogic =
                                 
                 | None -> bestWord
             | None ->
-                    
                     fold (fun acc x y ->
                     match step (fst(Set.minElement(Map.find x (st.tiles)))) (snd(dict)) with
                     | Some d ->                                           
-                        let current = (acc@[((nextCoord c2 hori),(x,(Set.minElement(Map.find x st.tiles))))])
-                        
+                        let current = (acc@[((c2),(x,(Set.minElement(Map.find x st.tiles))))])
                         if(fst(d)) then
                             //printf "Current list of letters: %A \n" (current)
                             aux d (removeSingle x hand) c2 current (longestWord current bestWord)
-                            
                         else
                             aux d (removeSingle x hand) c2 current bestWord
                     
-                    | None -> bestWord
+                    | None ->
+                        //printf "Acc: %A \n" (acc) 
+                        printf "Current bestmove: %A \n" (bestWord)
+                        //aux (false,st.dict) st.hand c List.empty bestWord 
+                        
+                        bestWord
                     ) currentWord hand
+                    
+                    
            
-        aux (false,st.dict) st.hand c List.empty List.empty
+        aux (false,st.dict) st.hand c List.empty List.empty //[((0,0),(20u,('T',1)));((1,0),(15u,('O',1)));]
     let move (st:State.state)=
         if(Map.isEmpty st.playedTiles) then
             printf "Move generated: %A \n" (moveGen st (0,0) true) 
