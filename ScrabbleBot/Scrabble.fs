@@ -123,7 +123,22 @@ module Scrabble =
                 let removed = List.fold (fun acc (_,(y,_)) -> MultiSet.removeSingle y acc) st.hand ms
                 let added = List.fold (fun acc (x,y) -> MultiSet.addSingle x acc) removed newPieces
                 let played = List.fold (fun acc (x,(_,y)) -> Map.add x y acc) st.playedTiles ms
-                let newTurn = if(st.playerNumber = st.numPlayers) then 1u else st.playerTurn+1u
+                let newTurn = 
+                    let rec foundPlayer playerNumber =
+                        if(playerNumber = st.numPlayers) then 
+                            if (MultiSet.contains 1u st.FF) then
+                                foundPlayer 1u
+                            else
+                                1u 
+                        else 
+                            if (MultiSet.contains (playerNumber + 1u) st.FF) then
+                                foundPlayer st.playerTurn+1u
+                            else
+                                st.playerTurn + 1u
+
+                    foundPlayer st.playerNumber
+                    
+                        
                 let tileCount = st.tilesLeft - (List.length ms)
                 let newScore = Map.add st.playerNumber points st.scores
                 let st' = {st with hand =  added; playerTurn = newTurn; playedTiles = played; tilesLeft = tileCount; scores = newScore}
