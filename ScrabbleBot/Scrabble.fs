@@ -11,6 +11,7 @@ open StateMonad
 
 
 
+
 // The RegEx module is only used to parse human input. It is not used for the final product.
 module RegEx =
     open System.Text.RegularExpressions
@@ -66,38 +67,94 @@ module internal State =
     let numPlayers st    = st.numPlayers
     let playerTurn st    = st.playerTurn
 module MoveLogic =
-    //let lPatial
-    let CurrentMove = ""
-    let handContain (st:State.state) c =
-        match List.tryFindBack (fun x -> (fst(Set.minElement(Map.find x st.tiles))) = c) (MultiSet.toList st.hand) with
-        | Some s -> true
-        | None -> false
-        
-    //let SaveMove (word:string) =
-        //List.ofSeq word |> 
-    let rightSide (st:State.state) (pw:string)  (dic:(bool*Dictionary.Dict)) (coord:ScrabbleUtil.coord) =
-        if not (Map.containsKey coord st.playedTiles) then
-            if (fst(dic)) then
-                SaveMove(pw)
-            for word in snd(dic) do
-                if(handContain (word.Chars(pw.Length-1))) then
-                    let newWord = (pw+(word.Chars(pw.Length-1)))
-                    rightside st newWord (Dictionary.step dic newWord) (fst(coord)+1,snd(coord))
-       
+    open Dictionary
+    let getLetter (st:State.state) (id:uint32) =
+       fst (Set.minElement(Map.find id st.tiles))
+    let nextCoord (c:coord) (hori:bool) =
+        if hori then
+            ((fst c)+1,(snd c))
         else
-            let newWord = (pw+(fst(Map.find coord st.playedTiles)))
-            rightside st newWord (Dictionary.step dic newWord) (fst(coord)+1,snd(coord))
-             
-                
-                
-    let wordCheck (st:State.state) =
-        let aux1 hand =
+            ((fst c),(snd c)-1)
+    let longestWord (word1: (coord * (uint32 * (char * int))) list) (word2: (coord * (uint32 * (char * int))) list) =
+        if(word1.Length>word2.Length) then word1
+        else word2 
+    let moveGen (st:State.state) (c:coord) (hori:bool) =
+        let rec aux (dict:(bool*Dict)) (hand:MultiSet<uint32>) (c2:coord) (cWord: (coord * (uint32 * (char * int))) list) (bWord: (coord * (uint32 * (char * int))) list)  =
+            match Map.tryFind c st.playedTiles with
+            | Some c ->
+                match Dictionary.step (fst c) st.dict with
+                | Some d -> aux d hand (nextCoord c2 hori) cWord bWord
+                        //if(fst(d)) then aux (d) hand c2 cWord bWord                
+//                        | Some d ->  MultiSet.fold (fun acc x y ->
+//                                        match Dictionary.step (fst(Set.minElement(Map.find x (st.tiles)))) (snd(d)) with
+//                                        | Some d ->                                           
+//                                            let current =
+//                                                if hori then
+//                                                    (cWord@[((fst(c2)+1,snd(c2)),(x,(Set.minElement(Map.find x st.tiles))))])
+//                                                else
+//                                                    (cWord@[((fst(c2),snd(c2)-1),(x,(Set.minElement(Map.find x st.tiles))))])
+//                                                                                                
+//                                            if(fst(d)) then
+//                                                aux d (MultiSet.removeSingle x hand) c2 current cWord
+//                                            else
+//                                                aux d (MultiSet.removeSingle x hand) c2 current bWord
+//                                        
+//                                        | None -> bWord
+//                                        ) cWord hand
+                                
+                | None -> bWord
+            | None -> MultiSet.fold (fun acc x y ->
+                                        match Dictionary.step (fst(Set.minElement(Map.find x (st.tiles)))) (snd(dict)) with
+                                        | Some d ->                                           
+                                            let current = (cWord@[((nextCoord c2 hori),(x,(Set.minElement(Map.find x st.tiles))))])                                             
+                                            if(fst(d)) then
+                                                aux d (MultiSet.removeSingle x hand) c2 current current
+                                            else
+                                                aux d (MultiSet.removeSingle x hand) c2 current bWord
+                                        
+                                        | None -> bWord
+                                        ) cWord hand
+           
+        aux (false,st.dict) st.hand c List.empty List.empty
+    let move (st:State.state)=
+        if(Map.isEmpty st.playedTiles) then moveGen st (0,0) true
+        else
+            Map.fold (fun acc k v -> moveGen st k true) List.empty st.playedTiles
             
-            match hand with
-            | x::y -> Dictionary.step x st.dict
-            
-        aux1 st.hand
-        //if(Map.count st.playedTiles = 0) then aux1 (0,0) st.Hand 
+        
+//    let handContain (st:State.state) c =
+//        match List.tryFindBack (fun x -> (fst(Set.minElement(Map.find x st.tiles))) = c) (MultiSet.toList st.hand) with
+//        | Some s -> true
+//        | None -> false
+//    let isWord c d =
+//        match step c d with
+//        | Some S -> true
+//        | None -> false
+//    let PlayMove = failwith "Not Implemented"
+//    let SaveMove (co:coord) (ch:char) (id:uint32) (p:int) =
+//        (string (fst(co))) + " " + (string (snd(co))) + " " + (string id) + (string ch) + (string p)
+    
+//    let rec rightSide (st:State.state) (pw:string) (dic:(bool*Dict)) (coord:coord) (currentMove: (coord * (uint32 * (char * int))) list)=
+//        if not (Map.containsKey coord st.playedTiles) then
+//            if (fst(dic)) then
+//                currentMove
+//            else     
+//                 for letter in (MultiSet.toList st.hand) do
+//                    let cLetter = getLetter st letter
+//                    if(isWord (cLetter) (snd(dic))) then
+//                        rightSide st (pw+(string cLetter)) (defaultArg(Dictionary.step cLetter (snd(dic))) dic) (fst(coord)+1,snd(coord)) (currentMove+(SaveMove coord cLetter letter (snd (Set.minElement(Map.find letter st.tiles)))))
+//        else
+//            rightSide st (pw+(string (fst(Map.find coord st.playedTiles)))) (defaultArg(Dictionary.step (fst(Map.find coord st.playedTiles)) (snd(dic))) dic) (fst(coord)+1,snd(coord)) currentMove
+//    let rec lPartial (st:State.state) (pw:string)  (dic:(bool*Dict)) limit =
+//        rightSide st pw dic (fst(Seq.head(Map.toSeq st.playedTiles)))
+//        if limit > 0 then
+//            for letter in (MultiSet.toList st.hand) do
+//                let cLetter = getLetter st letter
+//                if(isWord (cLetter) (snd(dic))) then
+//                    lPartial st (pw+(string cLetter)) (defaultArg(Dictionary.step cLetter (snd(dic))) dic) (limit-1) 
+//        lPartial st "" (false,st.dict)
+
+
 module Scrabble =
     open System.Threading
 
@@ -108,14 +165,15 @@ module Scrabble =
             
             // remove the force print when you move on from manual input (or when you have learnt the format)
             forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
-            let input =  System.Console.ReadLine()
-            let move = RegEx.parseMove input
-
-            debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
-            send cstream (SMPlay move)
+            //let input = MoveLogic.lPartial
+            //let input =  System.Console.ReadLine()
+            //let move = RegEx.parseMove input
+            
+            debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) (MoveLogic.move st)) // keep the debug lines. They are useful.
+            send cstream (SMPlay (MoveLogic.move st))
 
             let msg = recv cstream
-            debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
+            debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) (MoveLogic.move st)) // keep the debug lines. They are useful.
 
             match msg with
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->

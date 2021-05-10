@@ -1,11 +1,10 @@
-﻿// Insert your Dictionary.fsi file here. All modules must be internal.
-
-module internal Dictionary
+﻿module internal Dictionary
 
     open System.Collections.Generic
     type Dict =
         | Node of (bool * Map<char,Dict>) 
-
+    //let EdgeMap (Node(b,m)) = m
+        
     let empty () = Node (false,Map.empty)
     
     let insert (st:string) (Node (bool0,map0)) = 
@@ -35,7 +34,3 @@ module internal Dictionary
        match Map.tryFind c map0 with
        | Some (Node(bool1,map1)) -> Some (bool1,Node(bool1,map1))
        | None -> None
-        
-    // If you have made a lookup function you may include it here, but it will be generated for you by the project.
-
-    //let step : char -> Dict -> (bool * Dict) option = fun _ _ -> failwith "Not implemented"
