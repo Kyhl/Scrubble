@@ -79,11 +79,11 @@ module MoveLogic =
         if(word1.Length>word2.Length) then word1
         else word2 
     let moveGen (st:State.state) (c:coord) (hori:bool) =
-        let rec aux (dict:(bool*Dict)) (hand:MultiSet<uint32>) (c2:coord) (cWord: (coord * (uint32 * (char * int))) list) (bWord: (coord * (uint32 * (char * int))) list)  =
-            match Map.tryFind c st.playedTiles with
+        let rec aux (dict:(bool*Dict)) (hand:MultiSet<uint32>) (c2:coord) (currentWord: (coord * (uint32 * (char * int))) list) (bestWord: (coord * (uint32 * (char * int))) list)  =
+            match Map.tryFind c2 st.playedTiles with
             | Some c ->
-                match Dictionary.step (fst c) st.dict with
-                | Some d -> aux d hand (nextCoord c2 hori) cWord bWord
+                match step (fst c) (snd dict) with
+                | Some d -> aux d hand (nextCoord c2 hori) currentWord bestWord
                         //if(fst(d)) then aux (d) hand c2 cWord bWord                
 //                        | Some d ->  MultiSet.fold (fun acc x y ->
 //                                        match Dictionary.step (fst(Set.minElement(Map.find x (st.tiles)))) (snd(d)) with
@@ -102,22 +102,29 @@ module MoveLogic =
 //                                        | None -> bWord
 //                                        ) cWord hand
                                 
-                | None -> bWord
-            | None -> MultiSet.fold (fun acc x y ->
-                                        match Dictionary.step (fst(Set.minElement(Map.find x (st.tiles)))) (snd(dict)) with
-                                        | Some d ->                                           
-                                            let current = (cWord@[((nextCoord c2 hori),(x,(Set.minElement(Map.find x st.tiles))))])                                             
-                                            if(fst(d)) then
-                                                aux d (MultiSet.removeSingle x hand) c2 current current
-                                            else
-                                                aux d (MultiSet.removeSingle x hand) c2 current bWord
-                                        
-                                        | None -> bWord
-                                        ) cWord hand
+                | None -> bestWord
+            | None ->
+                    
+                    fold (fun acc x y ->
+                    match step (fst(Set.minElement(Map.find x (st.tiles)))) (snd(dict)) with
+                    | Some d ->                                           
+                        let current = (acc@[((nextCoord c2 hori),(x,(Set.minElement(Map.find x st.tiles))))])
+                        
+                        if(fst(d)) then
+                            //printf "Current list of letters: %A \n" (current)
+                            aux d (removeSingle x hand) c2 current (longestWord current bestWord)
+                            
+                        else
+                            aux d (removeSingle x hand) c2 current bestWord
+                    
+                    | None -> bestWord
+                    ) currentWord hand
            
         aux (false,st.dict) st.hand c List.empty List.empty
     let move (st:State.state)=
-        if(Map.isEmpty st.playedTiles) then moveGen st (0,0) true
+        if(Map.isEmpty st.playedTiles) then
+            printf "Move generated: %A \n" (moveGen st (0,0) true) 
+            moveGen st (0,0) true
         else
             Map.fold (fun acc k v -> moveGen st k true) List.empty st.playedTiles
             
