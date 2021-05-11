@@ -171,6 +171,16 @@ module Scrabble =
     let playGame cstream pieces (st : State.state) =
 
         let rec aux (st : State.state) =
+
+            let passTurnState playerId =
+                let newTurn = 
+                    if playerId = st.numPlayers then
+                        1u
+                    else
+                        playerId + 1u
+                let st' = {st with playerTurn = newTurn}
+                st'
+
             Print.printHand pieces (State.hand st)
             
             // remove the force print when you move on from manual input (or when you have learnt the format)
@@ -218,15 +228,24 @@ module Scrabble =
                 let st' = {st with playerTurn = newTurn; playedTiles = played; tilesLeft = tileCount; scores = newScore}
                 aux st'
             | RCM (CMPlayFailed (pid, ms)) ->
-                (* Failed play. Update your state *)
-                
-                let newTurn = if(pid = st.numPlayers) then 1u else st.playerTurn+1u
-                let st' = {st with playerTurn = newTurn}
-                aux st'
+                aux (passTurnState pid)
             | RCM (CMGameOver _) -> ()
             | RCM (CMForfeit pid) ->
+            // TODO should turn be updated here?
                 let st' = {st with FF = MultiSet.addSingle pid st.FF}
                 aux st'
+            | RCM (CMChange (playerId, numberOfTiles)) -> 
+                aux (passTurnState playerId)
+            | RCM (CMChangeSuccess newTiles) -> 
+                let newHand = List.fold (fun multiSet (tile, count) -> MultiSet.add tile count multiSet) MultiSet.empty newTiles
+                let st' = {st with hand = newHand}
+                aux st'
+            | RCM (CMTimeout playerId) -> 
+                aux (passTurnState playerId)
+            | RCM (CMPassed playerId) ->
+                aux (passTurnState playerId) 
+            
+
             | RCM a -> failwith (sprintf "not implmented: %A" a)
             | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st
 
