@@ -99,9 +99,9 @@ module MoveLogic =
         else word2 
     let moveGen (st:State.state) (c:coord) (hori:bool) =
         let rec aux (dict:(bool*Dict)) (hand:MultiSet<uint32>) (c2:coord) (currentWord: (coord * (uint32 * (char * int))) list) (bestWord: (coord * (uint32 * (char * int))) list)  =
-            match Map.tryFind c2 st.playedTiles with
+            match Map.tryFind c2 st.playedTiles with // Is there already a tile on that coordinate
             | Some c ->
-                match step (fst c) (snd dict) with
+                match step (fst c) (snd dict) with // Is c a leaf of the current node of the trie
                 | Some d -> aux d hand (nextCoord c2 hori) currentWord bestWord       
                 | None -> bestWord
             | None ->
@@ -123,13 +123,16 @@ module MoveLogic =
                     //printf "Best move %A" (bestWord)
            
         aux (false,st.dict) st.hand c List.empty List.empty //[((0,0),(20u,('T',1)));((1,0),(15u,('O',1)));]
+
+    type moves = (coord * (uint32 * (char * int))) list list
     let move (st:State.state)=
         if(Map.isEmpty st.playedTiles) then
            // printf "State : %A \n" st
             printf "Move generated: %A \n" (moveGen st (0,0) true) 
             moveGen st st.board.center true
         else
-            Map.fold (fun acc k v -> moveGen st k true) List.empty st.playedTiles
+            Map.fold (fun (acc: moves) k v -> (moveGen st k true) :: acc) [] st.playedTiles
+            |> List.head
             
         
 //    let handContain (st:State.state) c =
