@@ -1,22 +1,4 @@
-<<<<<<< Updated upstream
 bin
 obj
 .fake
 .ionide
-=======
-
-ScrabbleTemplate/obj/ScrabbleTemplate.fsproj.nuget.dgspec.json
-ScrabbleBot/obj/Debug/net5.0/ScrabbleBot.fsproj.CoreCompileInputs.cache
-ScrabbleBot/obj/Debug/net5.0/ScrabbleBot.fsprojAssemblyReference.cache
-ScrabbleBot/obj/project.assets.json
-ScrabbleBot/obj/project.nuget.cache
-ScrabbleBot/obj/rider.project.restore.info
-ScrabbleBot/obj/ScrabbleBot.fsproj.nuget.dgspec.json
-ScrabbleTemplate/bin/Debug/net5.0/ScrabbleTemplate.deps.json
-ScrabbleTemplate/obj/Debug/net5.0/ScrabbleTemplate.fsproj.CoreCompileInputs.cache
-ScrabbleTemplate/obj/Debug/net5.0/ScrabbleTemplate.fsprojAssemblyReference.cache
-ScrabbleTemplate/obj/project.assets.json
-ScrabbleTemplate/obj/project.nuget.cache
-ScrabbleTemplate/obj/rider.project.restore.info
-ScrabbleTemplate/obj/ScrabbleTemplate.fsproj.nuget.dgspec.json
->>>>>>> Stashed changes
