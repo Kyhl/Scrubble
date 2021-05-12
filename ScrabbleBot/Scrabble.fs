@@ -364,6 +364,18 @@ module WebMove =
             
             //Position currently scanned, default is the anchorpos
             let mutable scanCoord = aCoord
+
+            // let rec aux moveLimit =
+            //     if (Map.tryFind (prevCoord scanCoord hori) st.playedTiles)
+            //         .IsNone
+            //         && (moveLimit <= (size st.hand))
+            //         && (not (List.contains (prevCoord scanCoord hori) anchorTiles))
+            //         then
+            //         aux (moveLimit + 1u)
+            //     else
+                    
+
+            // aux 0u
             
             while (Map.tryFind (prevCoord scanCoord hori) st.playedTiles)
                       .IsNone
@@ -473,6 +485,15 @@ module Scrabble =
             let msg = recv cstream
             debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
 
+            let passTurnState playerId =
+                let newTurn = 
+                    if playerId = st.numPlayers then
+                        1u
+                    else
+                        playerId + 1u
+                let st' = {st with playerTurn = newTurn}
+                st'
+
             match msg with
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
@@ -507,14 +528,21 @@ module Scrabble =
                 aux st'
             | RCM (CMPlayFailed (pid, ms)) ->
                 (* Failed play. Update your state *)
-                
-                let newTurn = if(pid = st.numPlayers) then 1u else st.playerTurn+1u
-                let st' = {st with playerTurn = newTurn}
-                aux st'
+                aux (passTurnState pid)
             | RCM (CMGameOver _) -> ()
             | RCM (CMForfeit pid) ->
                 let st' = {st with FF = MultiSet.addSingle pid st.FF}
                 aux st'
+            | RCM (CMChange (playerId, numberOfTiles)) -> 
+                aux (passTurnState playerId)
+            | RCM (CMChangeSuccess newTiles) -> 
+                let newHand = List.fold (fun multiSet (tile, count) -> MultiSet.add tile count multiSet) MultiSet.empty newTiles
+                let st' = {st with hand = newHand}
+                aux st'
+            | RCM (CMTimeout playerId) -> 
+                aux (passTurnState playerId)
+            | RCM (CMPassed playerId) ->
+                aux (passTurnState playerId) 
             | RCM a -> failwith (sprintf "not implmented: %A" a)
             | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st
 
