@@ -275,24 +275,24 @@ module WebMove =
     let rec extendRight (st:State.state) hand pw dict nCoord anchorEmpty hori (acc: (coord*(uint32*(char*int)) )list ) :(coord*(uint32*(char*int)) )list list  =
         let mutable moveList = List.empty
         let mutable adj = Map.empty
-        let actualHand = fold (fun acc x y -> (x,(Map.find x st.tiles))::acc) List.empty hand
+        
         //Right-going aux
         let rec aux (st:State.state) hand pw dict nCoord anchors playedTiles (acc1: (coord*(uint32*(char*int)) )list ) =
-       
+            let actualHand = fold (fun acc x y -> (x,(Map.find x st.tiles))::acc) List.empty hand
             //Check if the word is actually a word
             if (lookup pw dict) && (Map.tryFind nCoord st.playedTiles).IsNone && (not anchorEmpty) then
                 let allowedLetters = cCheck st hori playedTiles
                 
-                let moveGen =
-                         (List.filter
-                            (fun (co, (i, (ch, v))) ->
-                                if(onBoard st co) then
-                                    match Map.tryFind co allowedLetters with
-                                    | Some cl -> (List.contains ch cl)
-                                    | None -> false
-                                else
-                                    false
-                            )acc1)
+                let moveGen = acc1
+//                         (List.filter
+//                            (fun (co, (i, (ch, v))) ->
+//                                if(onBoard st co) then
+//                                    match Map.tryFind co allowedLetters with
+//                                    | Some cl -> (List.contains ch cl)
+//                                    | None -> false
+//                                else
+//                                    false
+//                            )acc1)
                 //if(moveGen.Length = moveList.Length) then
                 let adjTiles = Map.ofList ((Map.toList playedTiles)@(Map.toList allowedLetters))
                 adj <- adjTiles
@@ -303,7 +303,6 @@ module WebMove =
                 | None -> 
                     match checkString pw (false,st.dict) with
                     | Some dict ->
-                        
                         for (i,t) in actualHand do
                             for (char,int) in t do
                                 let newHand = (MultiSet.removeSingle i hand)
