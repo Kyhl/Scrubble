@@ -323,11 +323,7 @@ module WebMove =
                     | None -> ()
         do aux st hand pw dict nCoord anchorEmpty adj acc
         moveList
-        
-    
-                                
-                                
-                        
+                                               
                     
             
     let leftPart (st: State.state) hand pw aCoord limit hori acc =
@@ -344,11 +340,11 @@ module WebMove =
                         for c,v in t do
                         match step c (snd l1) with
                         | Some _ -> aux st (removeSingle i hand) (pw + string c) (limit-1u) (((prevCoord aCoord hori),(i,(c,v)))::((List.map (fun (c,t) -> (prevCoord c hori,t))) acc1))
-                        
                         //If no words could be found, end the search
                         | None -> ()
                 | None -> ()
             else ()
+                
         do aux st hand pw limit []
         moveList
                     
@@ -360,30 +356,23 @@ module WebMove =
         
         let buildPrePart hori (aCoord:coord) =
             //How many tiles are free to the left
-            let mutable moveLimit = 0u
+            // let mutable moveLimit = 0u
             
             //Position currently scanned, default is the anchorpos
-            let mutable scanCoord = aCoord
+            // let mutable scanCoord = aCoord
 
-            // let rec aux moveLimit =
-            //     if (Map.tryFind (prevCoord scanCoord hori) st.playedTiles)
-            //         .IsNone
-            //         && (moveLimit <= (size st.hand))
-            //         && (not (List.contains (prevCoord scanCoord hori) anchorTiles))
-            //         then
-            //         aux (moveLimit + 1u)
-            //     else
-                    
+            let rec getMoveLimit moveLimit scanCoord =
+                if (Map.tryFind (prevCoord scanCoord hori) st.playedTiles)
+                    .IsNone
+                    && (moveLimit <= (size st.hand))
+                    && (not (List.contains (prevCoord scanCoord hori) anchorTiles))
+                    then
+                    getMoveLimit (moveLimit + 1u) (prevCoord scanCoord hori)
+                else
+                    moveLimit
 
-            // aux 0u
-            
-            while (Map.tryFind (prevCoord scanCoord hori) st.playedTiles)
-                      .IsNone
-                      && (moveLimit <= (size st.hand))
-                      && (not (List.contains (prevCoord scanCoord hori) anchorTiles))
-                      do
-                          moveLimit <- moveLimit + 1u
-                          scanCoord <- prevCoord scanCoord hori
+            let moveLimit = getMoveLimit 0u aCoord
+
             leftPart st hand "" c moveLimit hori moveList
         //Aux function that scans the position to the left of the current tile.    
         let rec aux (aCoord:coord) (preCoord:coord) pw hori acc =
