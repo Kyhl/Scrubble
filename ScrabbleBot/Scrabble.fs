@@ -240,37 +240,46 @@ module WebMove =
                    acc
                ) List.empty playedTiles
     //List.fold (fun acc (x,y) -> MultiSet.add x y acc) st.hand newTiles
+
+    let alphabet = "abcdefghijklmnopqrstuvwxyz"
+
     let cCheck (st:State.state) hori acc =
-        let anchors = findAnchors st.playedTiles hori
-        let mutable newAcc = acc
-        
-        for coord in anchors do
-            let mutable prevLetters = ""
-            let mutable cPos = coord
-            while (isFilled st.playedTiles (prevCross cPos hori )) do
-                cPos <- prevCross cPos hori 
-                prevLetters <-(string (fst(snd(Map.find cPos st.playedTiles)))) + prevLetters
-            let mutable nextLetters = ""
-            let mutable cPos = coord
-            while (isFilled st.playedTiles (nextCross cPos hori)) do
-                cPos <- nextCross cPos hori 
-                nextLetters <-nextLetters+(string (fst(snd(Map.find cPos st.playedTiles))))  
-            
-            newAcc <- Map.add coord (  
+        findAnchors st.playedTiles hori
+        |> List.fold (fun acc2 coord ->
+            let rec getPrevLetters cPos prevLetters = 
+                if (isFilled st.playedTiles (prevCross cPos hori )) then
+                    getPrevLetters (prevCross cPos hori) ((string (fst(snd(Map.find cPos st.playedTiles)))) + prevLetters)
+                else
+                    prevLetters
+            let prevLetters = getPrevLetters coord ""
+
+            let rec getNextLetters cPos nextLetters =
+                if (isFilled st.playedTiles (nextCross cPos hori)) then
+                    getNextLetters (nextCross cPos hori) (nextLetters+(string (fst(snd(Map.find cPos st.playedTiles))))) 
+                else
+                    nextLetters
+                    
+            let nextLetters = getNextLetters coord ""
+          
+            Map.add coord (  
                 if (prevLetters.Length = 0) && (nextLetters.Length = 0)
                 then
-                    Seq.toList "abcdefghijklmnopqrstuvwxyz"
+                    Seq.toList alphabet
                 else
-                    let mutable letterList = List.empty
-                    for l in (Seq.toList "abcdefghijklmnopqrstuvwxyz") do
+                    Seq.toList alphabet
+                    |> List.fold (fun acc l -> 
                         let completeWord = prevLetters +  (string l) + nextLetters
                         if (Dictionary.lookup completeWord st.dict) then
-                            letterList <- (l::letterList)
-                   
-                    letterList
-                ) newAcc
-        newAcc
-  
+                            l :: acc
+                        else
+                            acc
+                    ) []
+            ) acc2
+            
+        ) acc
+
+
+
   
     let rec extendRight (st:State.state) hand pw dict nCoord anchorEmpty hori (acc: (coord*(uint32*(char*int)) )list ) :(coord*(uint32*(char*int)) )list list  =
         let mutable moveList = List.empty
