@@ -490,7 +490,7 @@ module Scrabble =
                     if playerId = st.numPlayers then
                         1u
                     else
-                        playerId + 1u
+                        st.playerNumber + 1u
                 let st' = {st with playerTurn = newTurn}
                 st'
 
