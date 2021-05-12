@@ -126,14 +126,14 @@ module MoveLogic =
                     //printf "Best move %A" (bestWord)
            
         aux (false,st.dict) st.hand c List.empty List.empty //[((0,0),(20u,('T',1)));((1,0),(15u,('O',1)));]
-    let move (st:State.state)=
-        if(Map.isEmpty st.playedTiles) then
-           //printf "State : %A \n" st
-           let wordList = moveGen st st.board.center true
-           //printf "Move generated: %A \n" (wordList) 
-           wordList
-        else
-            Map.fold (fun acc k v -> moveGen st k true) List.empty st.playedTiles
+//    let move (st:State.state)=
+//        if(Map.isEmpty st.playedTiles) then
+//           //printf "State : %A \n" st
+//           let wordList = moveGen st st.board.center true
+//           //printf "Move generated: %A \n" (wordList) 
+//           wordList
+//        else
+//            Map.fold (fun acc k v -> moveGen st k true) List.empty st.playedTiles
             
         
 //    let handContain (st:State.state) c =
@@ -286,10 +286,10 @@ module WebMove =
         let mutable adj = Map.empty
         
         //Right-going aux
-        let rec aux (st:State.state) hand pw dict nCoord anchors playedTiles (acc1: (coord*(uint32*(char*int)) )list ) =
+        let rec aux (st:State.state) hand pw dict nCoord anchorFill playedTiles (acc1: (coord*(uint32*(char*int)) )list ) =
             let actualHand = fold (fun acc x y -> (x,(Map.find x st.tiles))::acc) List.empty hand
             //Check if the word is actually a word
-            if (lookup pw dict) && (Map.tryFind nCoord st.playedTiles).IsNone && (not anchorEmpty) then
+            if (lookup pw dict) && (Map.tryFind nCoord st.playedTiles).IsNone && (not anchorFill) then
                 let allowedLetters = cCheck st hori playedTiles
                 
                 let moveGen = acc1
@@ -316,11 +316,12 @@ module WebMove =
                             for (char,int) in t do
                                 let newHand = (MultiSet.removeSingle i hand)
                                 match step char (snd(dict)) with
-                                | Some (b,d) -> aux st newHand (pw+(string char)) d (nextCoord nCoord hori) Map.empty adj ((nCoord,(i,(char,int)))::acc1)
+                                | Some (b,d) ->
+                                    do aux st newHand (pw+(string char)) d (nextCoord nCoord hori) false adj ((nCoord,(i,(char,int)))::acc1)
                                 | None -> ()
                                 
                     | None -> ()
-        do aux st hand pw dict nCoord Map.empty adj acc
+        do aux st hand pw dict nCoord anchorEmpty adj acc
         moveList
         
     
@@ -329,26 +330,26 @@ module WebMove =
                         
                     
             
-    let leftPart (st: State.state) hand pw aCoord limit hori =
+    let leftPart (st: State.state) hand pw aCoord limit hori acc =
         //List of valid moves, gets changed throughout the course of the function. 
-        let mutable moveList = List.empty
+        let mutable moveList = acc
         let actualHand = fold (fun acc x y -> (x,(Map.find x st.tiles))::acc) List.empty hand
         //aux that finds the left-going moves depending on the anchor.
-        let rec aux (st:State.state) hand pw limit (acc:(coord*(uint32*(char*int))) list ) =
-            moveList <- (extendRight st hand pw st.dict aCoord false hori acc) @ moveList
+        let rec aux (st:State.state) hand pw limit (acc1:(coord*(uint32*(char*int))) list ) =
+            moveList <- (extendRight st hand pw st.dict aCoord true hori acc1) @ moveList
             if limit > 0u then
                 match checkString pw (false,st.dict) with
                 | Some l1 ->
                     for i,t in actualHand do
                         for c,v in t do
                         match step c (snd l1) with
-                        | Some _ -> aux st (removeSingle i hand) (pw + string c) (limit-1u) (((prevCoord aCoord hori),(i,(c,v)))::((List.map (fun (c,t) -> (prevCoord c hori,t))) acc))
+                        | Some _ -> aux st (removeSingle i hand) (pw + string c) (limit-1u) (((prevCoord aCoord hori),(i,(c,v)))::((List.map (fun (c,t) -> (prevCoord c hori,t))) acc1))
                         
                         //If no words could be found, end the search
                         | None -> ()
                 | None -> ()
             else ()
-        aux st hand pw limit []
+        do aux st hand pw limit []
         moveList
                     
     let findAll (st:State.state) (hori:bool) (c:coord) hand =
@@ -366,12 +367,12 @@ module WebMove =
             
             while (Map.tryFind (prevCoord scanCoord hori) st.playedTiles)
                       .IsNone
-                      && (moveLimit <= (size st.hand)*2u)
+                      && (moveLimit <= (size st.hand))
                       && (not (List.contains (prevCoord scanCoord hori) anchorTiles))
                       do
                           moveLimit <- moveLimit + 1u
                           scanCoord <- prevCoord scanCoord hori
-            leftPart st hand "" c moveLimit hori
+            leftPart st hand "" c moveLimit hori moveList
         //Aux function that scans the position to the left of the current tile.    
         let rec aux (aCoord:coord) (preCoord:coord) pw hori acc =
             //We need to find the starting tile on the board.
@@ -382,22 +383,25 @@ module WebMove =
             //No more full tiles to the left.
             | None ->
                 if((checkString pw (false,st.dict)).IsNone) && pw.Length > 0 then
-                    extendRight st hand pw st.dict aCoord false hori acc
+                    extendRight st hand pw st.dict aCoord true hori acc
                 else
                     buildPrePart hori aCoord
         if List.isEmpty anchorTiles then
             printf "MoveList %A" (moveList)
-            moveList <- extendRight st hand  "" st.dict st.board.center false hori []
+            moveList <- extendRight st hand  "" st.dict st.board.center true hori []
             
         else
-            for hori in [true;false] do
-                for aCoord in anchorTiles do
-                    let newMove = aux aCoord (prevCoord aCoord hori) "" hori []
+            for direction in [true;false;] do
+                for wCoord in anchorTiles do
+                    let newMove = aux wCoord (prevCoord wCoord direction) "" direction []
                     
                     //Extra check to make sure that no duplicates are inserted.
-                    let dMoves = List.filter (fun m -> not (List.contains m moveList)) newMove
-                    moveList <- dMoves @ moveList
+                    //let dMoves = List.filter (fun m -> not (List.contains m moveList)) newMove
+                    moveList <- newMove @ moveList
+        //
+        aux c (prevCoord c hori) "" hori []
         moveList
+        
                         
                 
 //        let rec aux (playedTiles : Map<coord,(char*int)>) hand cWord (c0:coord) =
@@ -425,17 +429,20 @@ module WebMove =
 //            l1
 //        else
 //            l2
-    let moveh (st:State.state)=
+    let move (st:State.state)=
         if(Map.isEmpty st.playedTiles) then
            //printf "State : %A \n" st
            let rightList = findAll st true st.board.center st.hand
            let wordList = (findAll st false st.board.center st.hand)@rightList
-           //printf "Move generated: %A \n" (wordList) 
-           List.max wordList
+           //printf "Move generated: %A \n" (wordList)
+            
+           (SMPlay (List.max wordList))
         else
             let rightList = Map.fold (fun acc k v -> findAll st true k st.hand) List.empty st.playedTiles
-            let finalList = (Map.fold (fun acc k v -> findAll st false k st.hand) List.empty st.playedTiles)@rightList
-            List.max finalList
+            let wordList = (Map.fold (fun acc k v -> findAll st false k st.hand) List.empty st.playedTiles)@rightList
+            if(wordList.IsEmpty) then (SMChange (toList st.hand))
+            else 
+            (SMPlay (List.max wordList))
             
             
             
@@ -446,7 +453,7 @@ module WebMove =
         
 module Scrabble =
     open System.Threading
-    open MoveLogic
+    //open MoveLogic
     open WebMove
     let playGame cstream pieces (st : State.state) =
 
@@ -456,14 +463,15 @@ module Scrabble =
             // remove the force print when you move on from manual input (or when you have learnt the format)
             //forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
            
-            //let input =  System.Console.ReadLine()
-            //let move = RegEx.parseMove input
-            let m = moveh (State.state st)
-            debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) m) // keep the debug lines. They are useful.
-            send cstream (SMPlay m)
-
+//            let input =  System.Console.ReadLine()
+//            let move = RegEx.parseMove input
+//            send cstream (SMPlay move)
+            let move = move (State.state st)
+            debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
+            send cstream (move)
+            
             let msg = recv cstream
-            debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) m) // keep the debug lines. They are useful.
+            debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
 
             match msg with
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
