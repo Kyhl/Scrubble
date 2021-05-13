@@ -409,8 +409,8 @@ module WebMove =
                     //let dMoves = List.filter (fun m -> not (List.contains m moveList)) newMove
                     moveList <- newMove @ moveList
         //
-        aux c (prevCoord c hori) "" hori []
-        //moveList
+        //aux c (prevCoord c hori) "" hori []
+        moveList
         
                         
                 
