@@ -17,19 +17,7 @@
                 | None -> Node(bool1,Map.add x (go (x1,empty())) map1)
         go (Seq.toList st,Node(bool0,map0))
 
-    let lookup (st:string) (Node (bool0,map0)) = 
-        let rec go = 
-            function
-            |([],(Node (_,_))) -> false
-            |(x::x1,(Node (_,map1))) when List.isEmpty x1 ->
-                match Map.tryFind x map1 with
-                | Some (Node (bool1,_))  -> bool1
-                | None                -> false
-            |(x::xs,(Node (_,map1))) ->
-                match Map.tryFind x map1 with
-                | Some (Node (bool1,map2)) -> go (xs,Node(bool1,map2))
-                | None                -> false
-        go (Seq.toList st,(Node (bool0,map0)))
+    
     let step c (Node(bool0,map0)) =
        match Map.tryFind c map0 with
        | Some (Node(bool1,map1)) -> Some (bool1,Node(bool1,map1))

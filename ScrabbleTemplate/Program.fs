@@ -43,8 +43,8 @@ let main argv =
     let handSize   = 7u
     let timeout    = None
     let tiles      = ScrabbleUtil.English.tiles 1u
-    let seed       = Some 420//None
-    //let seed       = None 
+    let seed       = Some 420
+//    let seed       = None 
     let port       = 13001
 
     //let players = spawnMultiples "OxyphenButazone" Oxyphenbutazone.Scrabble.startGame 2
