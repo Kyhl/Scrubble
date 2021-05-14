@@ -399,17 +399,19 @@ module WebMove =
 
         if List.isEmpty anchorTiles then
             printf "MoveList %A" (moveList)
-            extendRight st hand  "" st.dict Map.empty st.board.center true hori []
+            moveList <- extendRight st hand  "" st.dict Map.empty st.board.center true hori []
             
         else
-            let rec elseAux index direction acc =
-                if (index = anchorTiles.Length) then
-                    acc
-                else
-                    let newMove = aux anchorTiles.[index] (prevCoord anchorTiles.[index] direction) "" direction []
-                    elseAux (index + 1) direction (newMove @ acc)
-            elseAux 0 true []
-            |> elseAux 0 false
+            let newMove = List.fold (fun acc d -> (List.fold (fun acc1 c -> (aux c (prevCoord c d) "" d [])@acc1) List.empty anchorTiles)@acc ) List.empty [true;false;]
+            moveList <- newMove @ moveList
+//            let rec elseAux index direction acc =
+//                if (index = anchorTiles.Length) then
+//                    acc
+//                else
+//                    let newMove = aux anchorTiles.[index] (prevCoord anchorTiles.[index] direction) "" direction []
+//                    elseAux (index + 1) direction (newMove @ acc)
+//            elseAux 0 true []
+//            |> elseAux 0 false
 
 
 
@@ -422,7 +424,7 @@ module WebMove =
         //             moveList <- newMove @ moveList
         // //
         // //aux c (prevCoord c hori) "" hori []
-        // moveList
+        moveList
         
                         
                 
