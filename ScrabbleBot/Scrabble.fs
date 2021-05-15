@@ -323,6 +323,7 @@ module WebMove =
 //                printf "Condition: %A" cond 
 //                if (cond) then
 //                    moveList <- acc1 :: moveList
+//                else 
 //                ()
                 moveList <- acc1 :: moveList
             
@@ -370,7 +371,7 @@ module WebMove =
                         let tile = (Map.find i st.tiles)
                         for c,v in tile do
                             match step c (snd l1) with
-                            | Some _ -> aux st (removeSingle i hand) (pw + string c) (limit-1u) (((prevCoord aCoord hori),(i,(c,v)))::((List.map (fun (c,t) -> ((prevCoord c hori),t))) acc))
+                            | Some _ -> aux st (removeSingle i hand) ( (string c) + pw ) (limit-1u) (((prevCoord aCoord hori),(i,(c,v)))::((List.map (fun (c,t) -> ((prevCoord c hori),t))) acc))
                             //If no words could be found, end the search
                             | None -> ()
                 | None -> ()
