@@ -352,10 +352,47 @@ module WebMove =
                                 | None -> ()            
                     | None -> ()
                 
-                    
-           
-        do aux st hand pw dict coord anchorEmpty pt acc
-        moveList
+        let rec aux2 (st:State.state) hand1 pw (dict1:bool*Dict) nCoord anchEmpty playedTiles (acc1: (coord*(uint32*(char*int)) )list) words = 
+            if (onBoard st nCoord) then 
+                match Map.tryFind nCoord st.playedTiles with
+                | Some (id,(char,value)) ->
+                    match step char (snd dict1) with
+                    | None -> words
+                    | Some d3 -> aux2 st hand (pw + string char) d3 (nextCoord nCoord hori) false (Map.add nCoord (id,(char,value)) playedTiles) acc1 words
+                | None -> 
+                    match checkString pw st.dict with
+                    | Some (bool,dict2) ->
+                        MultiSet.fold (fun word tileId count -> 
+                            let tiles = Map.find tileId st.tiles
+                            let tile = (Set.toList tiles).[0]
+                            match step (tile |> fst) dict2 with
+                            | Some node ->
+                                
+                                let change = (nCoord,(tileId,(tile |> fst, tile |> snd)))
+                                if (lookup pw (snd dict1)) &&
+                                   (Map.tryFind nCoord st.playedTiles).IsNone &&
+                                   (not anchEmpty) &&
+                                   (bool)
+                                   then
+                                    (aux2 st (removeSingle tileId hand1) (pw+(string char)) node (nextCoord nCoord hori) false playedTiles (change::acc1) (acc1::words))
+                                else
+                                    (aux2 st (removeSingle tileId hand1) (pw+(string char)) node (nextCoord nCoord hori) false playedTiles (change::acc1) words)
+                                
+                            | None -> words  
+
+
+                        ) [] hand
+                    | None -> words
+            else
+                []
+        // let rec aux3 words =
+        //     let word = aux2 st hand pw dict coord anchorEmpty pt acc
+
+
+        aux2 st hand pw dict coord anchorEmpty pt acc []
+        
+        // do aux st hand pw dict coord anchorEmpty pt acc
+        // moveList
                                                    
     let leftPart (st: State.state) hand pw aCoord dict limit hori =
         //List of valid moves, gets changed throughout the course of the function. 
