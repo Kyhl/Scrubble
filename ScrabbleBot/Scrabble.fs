@@ -242,8 +242,8 @@ module WebMove =
             let newList = List.fold (fun acc1 (c,b) ->
                 if(b) then
                     c::acc1
-                else acc1
-            
+                else
+                    acc1
                             ) [] help 
                 
             newList@acc
@@ -255,45 +255,79 @@ module WebMove =
     let cCheck (st:State.state) hori acc =
         let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         let anc = findAnchors st acc hori
-        List.fold (fun acc2 coord ->
-            let rec getPrevLetters cPos prevLetters = 
-                if (isFilled st.playedTiles (prevCross cPos hori )) then
-                    getPrevLetters (prevCross cPos hori) ((string (fst(snd(Map.find cPos st.playedTiles)))) + prevLetters)
-                else
-                    prevLetters
-            let prevLetters = getPrevLetters coord ""
+        if(Map.isEmpty st.playedTiles) then 
+            List.fold (fun acc2 coord ->
+                let rec getPrevLetters cPos prevLetters = 
+                    if (isFilled st.playedTiles (prevCross cPos hori )) then
+                        getPrevLetters (prevCross cPos hori) ((string (fst(snd(Map.find cPos st.playedTiles)))) + prevLetters)
+                    else
+                        prevLetters
+                let prevLetters = getPrevLetters coord ""
 
-            let rec getNextLetters cPos nextLetters =
-                if (isFilled st.playedTiles (nextCross cPos hori)) then
-                    getNextLetters (nextCross cPos hori) (nextLetters+(string (fst(snd(Map.find cPos st.playedTiles))))) 
-                else
-                    nextLetters
-                    
-            let nextLetters = getNextLetters coord ""
-          
-            Map.add coord (  
+                let rec getNextLetters cPos nextLetters =
+                    if (isFilled st.playedTiles (nextCross cPos hori)) then
+                        getNextLetters (nextCross cPos hori) (nextLetters+(string (fst(snd(Map.find cPos st.playedTiles))))) 
+                    else
+                        nextLetters
+                        
+                let nextLetters = getNextLetters coord ""
+              
+                Map.add coord (  
 
-                if (prevLetters.Length = 0) && (nextLetters.Length = 0)
-                then
-                    Seq.toList alphabet
-                else
-                    List.fold (fun acc l -> 
-                        let completeWord = prevLetters +  (string l) + nextLetters
-                        if (lookup completeWord st.dict) then
-                            l :: acc
-                        else
-                            acc
-                    ) [] (Seq.toList alphabet)
-            ) acc2
-            
-        ) (Map.add (0,0) (Seq.toList alphabet) Map.empty) anc
+                    if (prevLetters.Length = 0) && (nextLetters.Length = 0)
+                    then
+                        Seq.toList alphabet
+                    else
+                        List.fold (fun acc l -> 
+                            let completeWord = prevLetters +  (string l) + nextLetters
+                            if (lookup completeWord st.dict) then
+                                l :: acc
+                            else
+                                acc
+                        ) [] (Seq.toList alphabet)
+                ) acc2
+                
+            ) (Map.add (0,0) (Seq.toList alphabet) Map.empty) anc
+        else
+            List.fold (fun acc2 coord ->
+                let rec getPrevLetters cPos prevLetters = 
+                    if (isFilled st.playedTiles (prevCross cPos hori )) then
+                        getPrevLetters (prevCross cPos hori) ((string (fst(snd(Map.find cPos st.playedTiles)))) + prevLetters)
+                    else
+                        prevLetters
+                let prevLetters = getPrevLetters coord ""
+
+                let rec getNextLetters cPos nextLetters =
+                    if (isFilled st.playedTiles (nextCross cPos hori)) then
+                        getNextLetters (nextCross cPos hori) (nextLetters+(string (fst(snd(Map.find cPos st.playedTiles))))) 
+                    else
+                        nextLetters
+                        
+                let nextLetters = getNextLetters coord ""
+              
+                Map.add coord (  
+
+                    if (prevLetters.Length = 0) && (nextLetters.Length = 0)
+                    then
+                        Seq.toList alphabet
+                    else
+                        List.fold (fun acc l -> 
+                            let completeWord = prevLetters +  (string l) + nextLetters
+                            if (lookup completeWord st.dict) then
+                                l :: acc
+                            else
+                                acc
+                        ) [] (Seq.toList alphabet)
+                ) acc2
+                
+            ) Map.empty anc
 
   
-    let extendRight (st:State.state) hand pw (dict:bool*Dict) pt coord anchorEmpty hori (acc: (coord*(uint32*(char*int)) )list )   =
+    let extendRight (st:State.state) hand pw (dict:bool*Dict) pt coord anchorEmpty hori (acc: (coord*(uint32*(char*int)) )list  )   =
         let mutable moveList = List.empty
         
         //Right-going aux
-        let rec aux (st:State.state) hand1 pw (dict1:bool*Dict) nCoord anchEmpty playedTiles (acc1: (coord*(uint32*(char*int)) )list) =
+        let rec aux (st:State.state) hand1 pw (dict1:bool*Dict) nCoord anchEmpty playedTiles (acc1: (coord*(uint32*(char*int)) )list ) =
             //Check if the word is actually a word
             //let realWord = lookup pw st.dict
             if (lookup pw (snd dict1)) && (Map.tryFind nCoord st.playedTiles).IsNone && (not anchEmpty) && (fst dict1) then   
@@ -323,10 +357,9 @@ module WebMove =
 //                printf "Condition: %A" cond 
 //                if (cond) then
 //                    moveList <- acc1 :: moveList
-//                else 
-//                ()
+////                else 
+////                ()
                 moveList <- acc1 :: moveList
-            
             if (onBoard st nCoord) then 
                 match Map.tryFind nCoord st.playedTiles with
                 | Some (id,(char,value)) ->
@@ -341,49 +374,43 @@ module WebMove =
                             for (char,int) in tile do
                                 match step char dict2 with
                                 | Some node ->
-                                    
                                     let change = (nCoord,(i,(char,int)))
 //                                    printfn "acc: %A " acc1
 //                                    printfn "change: %A" change
                                     //printfn "MoveList Length: %A" moveList.Length
-                                    
-                                    aux st (removeSingle i hand1) (pw+(string char)) node (nextCoord nCoord hori) false playedTiles (change::acc1)
-                                    
+                                    aux st (removeSingle i hand1) (pw+(string char)) node (nextCoord nCoord hori) false playedTiles (change::acc1)   
                                 | None -> ()            
                     | None -> ()
-                
-                    
-           
         do aux st hand pw dict coord anchorEmpty pt acc
         moveList
                                                    
-    let leftPart (st: State.state) hand pw aCoord dict limit hori =
+    let leftPart (st: State.state) hand pw aCoord limit hori =
         //List of valid moves, gets changed throughout the course of the function. 
         let mutable moveList = List.Empty
 //        let actualHand = fold (fun acc x y -> (x,(Map.find x st.tiles))::acc) List.empty hand
         //aux that finds the left-going moves depending on the anchor.
         let rec aux (st:State.state) hand pw limit acc =
-            moveList <- (extendRight st hand pw dict Map.empty aCoord true hori acc) @ moveList
+            moveList <- (extendRight st hand pw (false,st.dict) Map.empty aCoord true hori acc) @ moveList
             if (limit > 0u) then
                 match checkString pw st.dict with
-                | Some l1 ->
+                | Some (bool,dict) ->
                     for i in (toList hand) do
                         let tile = (Map.find i st.tiles)
                         for c,v in tile do
-                            match step c (snd l1) with
-                            | Some _ -> aux st (removeSingle i hand) ( (string c) + pw ) (limit-1u) (((prevCoord aCoord hori),(i,(c,v)))::((List.map (fun (c,t) -> ((prevCoord c hori),t))) acc))
+                            match step c dict with
+                            | Some _ -> aux st (removeSingle i hand) (pw + (string c) ) (limit-1u) (((prevCoord aCoord hori),(i,(c,v)))::((List.map (fun (c,t) -> (prevCoord c hori,t))) acc))
                             //If no words could be found, end the search
                             | None -> ()
                 | None -> ()
-            else ()
+            else
+                ()
                 
         do aux st hand pw limit []
         moveList
                     
     let findAll (st:State.state) (hori:bool) (c:coord) hand =
         let anchorTiles = (findAnchors st st.playedTiles hori)
-          
-            
+        
         let mutable moveList = List.empty
         
         let buildPrePart hori (aCoord:coord) =
@@ -396,15 +423,17 @@ module WebMove =
             let rec getMoveLimit moveLimit scanCoord =
                 if (Map.tryFind (prevCoord scanCoord hori) st.playedTiles)
                     .IsNone
-                    && (moveLimit <= (size st.hand)*2u)
+                    && (moveLimit <= (size st.hand)+2u)
                     && (not (List.contains (prevCoord scanCoord hori) anchorTiles))
                     then
-                    getMoveLimit (moveLimit + 1u) (prevCoord scanCoord hori)
+                        getMoveLimit (moveLimit + 1u) (prevCoord scanCoord hori)
                 else
                     moveLimit
+            
 
             let moveLimit = getMoveLimit 0u aCoord
-            leftPart st hand "" c (false,st.dict) moveLimit hori
+            leftPart st hand "" c moveLimit hori    
+            
             
         //Aux function that scans the position to the left of the current tile.    
         let rec aux (aCoord:coord) (preCoord:coord) pw hori acc =
@@ -415,27 +444,30 @@ module WebMove =
                 aux aCoord (prevCoord preCoord hori) (string c + pw) hori ((preCoord,(id,(c,v)))::acc)
             //No more full tiles to the left.
             | None ->
-                if((checkString pw st.dict).IsSome) && pw.Length > 0 then
-                    extendRight st hand pw (true,st.dict) st.playedTiles aCoord true hori []
-                    
-                else
-                    buildPrePart hori aCoord
-                    
+                match (checkString pw st.dict) with
+                | Some res ->
+                    if(pw.Length>0) then
+                        (extendRight st hand pw res (Map.ofList acc) aCoord true hori [])
+                    else
+                        buildPrePart hori aCoord
+                | None -> buildPrePart hori aCoord
+        
+            
 
-        if List.isEmpty anchorTiles then
+        if anchorTiles = [(0,0);] then
             //printf "MoveList %A" (moveList)
-            moveList <- extendRight st hand  "" (true,st.dict) Map.empty st.board.center true hori []           
+            moveList <- extendRight st hand "" (false,st.dict) Map.empty st.board.center true hori []           
         else 
             let newMove =
                 List.fold
                     (fun acc d ->
-                        (List.fold (fun acc1 c -> (aux c (prevCoord c d) "" d [])@acc1)
-                        acc
-                        anchorTiles))
+                        (List.fold (fun acc1 c -> moveList@(aux c (prevCoord c d) "" d []))
+                        []
+                        anchorTiles)@moveList)
                     []
                     [true;false;]
             moveList <- newMove @ moveList
-        //moveList <- (aux c (prevCoord c hori) "" hori [])@moveList
+//        moveList <- (aux c (prevCoord c hori) "" hori [])@moveList
         moveList
         
                         
