@@ -3,7 +3,7 @@
 
 module internal StateMonad
 
-   type Error = 
+    type Error = 
         | VarExists of string
         | VarNotFound of string
         | IndexOutOfBounds of int
@@ -97,13 +97,13 @@ module internal StateMonad
             function
             | []      -> None
             | m :: ms -> 
-                match Map.tryFindKey (fun fk a-> fk.Equals(x)) m with
+                match Map.tryFindKey (fun fk _-> fk.Equals(x)) m with
                 | None -> Some ((Map.add x 0 m) :: ms)
                 | Some v   -> None
         S (fun s -> 
               match aux (s.vars) with
               | Some v -> if(s.reserved.Contains(x)) then Failure (ReservedName x) else Success ((),{s with vars = v})
               | None   -> Failure (VarExists x))   
-          
+              
               
      
