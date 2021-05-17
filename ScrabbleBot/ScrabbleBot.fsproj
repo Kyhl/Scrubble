@@ -5,10 +5,10 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company>IT University of Copenhagen</Company>
    
-    <Version>1.0.2</Version>
+    <Version>2.2.0</Version>
     <PackageId>itiswhatitis</PackageId>
     <AssemblyName>itiswhatitis</AssemblyName>
-    <Authors>kaky,thhk </Authors>
+    <Authors>kaky,thhk, krbh </Authors>
     <Product>ScrubbleBot</Product>
     <Description>Scrabble Bot for Functional Programming 2021
       
