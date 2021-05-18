@@ -11,7 +11,7 @@
           "FSharp.Core": "5.0.1",
           "Oxyphenbutazone": "1.0.6",
           "ScrabbleServer": "1.0.7",
-          "itiswhatitis": "2.0.0"
+          "itiswhatitis": "2.2.0"
         },
         "runtime": {
           "ScrabbleTemplate.dll": {}
@@ -205,7 +205,7 @@
           "System.Runtime": "4.3.0"
         }
       },
-      "itiswhatitis/2.0.0": {
+      "itiswhatitis/2.2.0": {
         "dependencies": {
           "FParsec": "1.1.1",
           "FSharp.Core": "5.0.1",
@@ -342,7 +342,7 @@
       "path": "system.threading.tasks/4.3.0",
       "hashPath": "system.threading.tasks.4.3.0.nupkg.sha512"
     },
-    "itiswhatitis/2.0.0": {
+    "itiswhatitis/2.2.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

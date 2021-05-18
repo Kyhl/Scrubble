@@ -257,7 +257,7 @@
           "ref/netstandard1.3/System.Threading.Tasks.dll": {}
         }
       },
-      "itiswhatitis/2.0.0": {
+      "itiswhatitis/2.2.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v5.0",
         "dependencies": {
@@ -958,7 +958,7 @@
         "system.threading.tasks.nuspec"
       ]
     },
-    "itiswhatitis/2.0.0": {
+    "itiswhatitis/2.2.0": {
       "type": "project",
       "path": "../ScrabbleBot/ScrabbleBot.fsproj",
       "msbuildProject": "../ScrabbleBot/ScrabbleBot.fsproj"
@@ -969,7 +969,7 @@
       "FSharp.Core >= 5.0.1",
       "Oxyphenbutazone >= 1.0.6",
       "ScrabbleServer >= 1.0.7",
-      "itiswhatitis >= 2.0.0"
+      "itiswhatitis >= 2.2.0"
     ]
   },
   "packageFolders": {
