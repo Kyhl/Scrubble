@@ -28,7 +28,7 @@ let main argv =
 
 
     let board        = ScrabbleUtil.StandardBoard.standardBoard ()
-    let board      = ScrabbleUtil.InfiniteBoard.infiniteBoard ()
+//    let board      = ScrabbleUtil.InfiniteBoard.infiniteBoard ()
 
 //    let board      = ScrabbleUtil.RandomBoard.randomBoard ()
 //    let board      = ScrabbleUtil.RandomBoard.randomBoardSeed (Some 42)
@@ -44,7 +44,7 @@ let main argv =
     let timeout    = None
     let tiles      = ScrabbleUtil.English.tiles 1u
     let seed       = Some 420
-    let seed       = None 
+//    let seed       = None 
     let port       = 13001
 
     //let players = spawnMultiples "OxyphenButazone" Oxyphenbutazone.Scrabble.startGame 2
