@@ -244,7 +244,7 @@ module internal MoveLogic =
                 match Map.tryFind nCoord st.playedTiles with
                 | Some (id,(char,value)) ->
                     match step char (snd dict1) with
-                    | Some d3 -> aux st hand (pw + (string char)) d3 (nextCoord nCoord hori) false (Map.add nCoord (id,(char,value)) playedTiles) acc1 
+                    | Some d3 -> aux st hand1 (pw + (string char)) d3 (nextCoord nCoord hori) false (Map.add nCoord (id,(char,value)) playedTiles) acc1 
                     | None -> ()
                 | None -> 
                     match checkString pw (st.dict) with
